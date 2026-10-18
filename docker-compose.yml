@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  # FalkorDB: The Graph Database for AI Agents
+  falkordb:
+    image: falkordb/falkordb:latest
+    container_name: graph-sentinel-falkordb
+    ports:
+      - "6379:6379"  # Redis/Cypher port
+      - "3000:3000"  # FalkorDB Browser UI
+    environment:
+      - FALKORDB_PASSWORD=
+    volumes:
+      - falkordb_data:/data
+    restart: unless-stopped
+
+  # GraphSentinel AI Backend & Web UI
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: graph-sentinel-app
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - FALKORDB_HOST=falkordb
+      - FALKORDB_PORT=6379
+    depends_on:
+      - falkordb
+    restart: unless-stopped
+
+volumes:
+  falkordb_data:

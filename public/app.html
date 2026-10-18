@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investigation Console &bull; GraphSentinel AI</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #09090b; }
+    ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+    
+    body {
+      background-color: #09090b;
+      color: #fafafa;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+
+    .font-mono-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .border-subtle { border-color: #27272a; }
+    .bg-surface-1 { background-color: #121215; }
+    .bg-surface-2 { background-color: #18181b; }
+    .bg-surface-3 { background-color: #27272a; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-zinc-800 selection:text-zinc-100">
+
+  <!-- TOP ENGINE BAR -->
+  <aside aria-label="Engine status" class="border-b border-subtle bg-surface-1 py-1.5 px-4 text-xs font-mono-code text-zinc-400 flex flex-wrap items-center justify-between gap-2">
+    <div class="flex items-center gap-3">
+      <a href="/" class="text-zinc-300 hover:text-white flex items-center gap-1 font-semibold">
+        &larr; Back to Landing Page
+      </a>
+      <span class="text-zinc-600">|</span>
+      <span class="inline-flex items-center gap-1.5 text-zinc-300">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span>falkordb:6379 (in-memory graph connected)</span>
+      </span>
+      <span class="text-zinc-600">|</span>
+      <span>cluster: prod-us-east-1</span>
+    </div>
+    <div class="flex items-center gap-3 text-zinc-400">
+      <span>FalkorDB Graph Hacks 2026</span>
+      <span class="text-zinc-600">|</span>
+      <span class="text-zinc-300 font-mono-code">Console v0.4.2</span>
+    </div>
+  </aside>
+
+  <!-- NAVIGATION HEADER -->
+  <header class="border-b border-subtle bg-surface-1/95 sticky top-0 z-40 px-6 py-3 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded bg-zinc-100 text-zinc-950 flex items-center justify-center font-bold text-xs font-mono-code">
+            GS
+          </div>
+          <span class="font-semibold text-sm tracking-tight text-zinc-100">GraphSentinel</span>
+        </a>
+        <span class="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 font-mono-code border border-zinc-700">Live Agent Console</span>
+      </div>
+
+      <div class="flex items-center gap-3 text-xs font-mono-code text-zinc-400">
+        <span class="text-zinc-500">partition:</span>
+        <label for="tenant-selector" class="sr-only">Graph Partition</label>
+        <select id="tenant-selector" onchange="switchPartition(this.value)" class="bg-surface-2 border border-subtle rounded px-2.5 py-1 text-zinc-200 text-xs focus:outline-none focus:border-zinc-500 font-mono-code">
+          <option value="production-mesh">production-mesh (Default)</option>
+          <option value="staging-mesh">staging-mesh</option>
+          <option value="tenant-fintech">tenant-fintech-sandbox</option>
+        </select>
+        <button onclick="resetConsole()" class="px-2.5 py-1 rounded border border-subtle text-zinc-400 hover:text-zinc-200 hover:bg-surface-2 transition">
+          reset-state
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONSOLE WORKSPACE -->
+  <main class="max-w-7xl mx-auto w-full p-4 md:p-6 flex-1 flex flex-col gap-4">
+    
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+      <!-- LEFT: ALERT INGESTION & TRACE STREAM (4 COLS) -->
+      <div class="lg:col-span-4 flex flex-col gap-4">
+
+        <!-- ALERT INGESTION -->
+        <div class="bg-surface-1 border border-subtle rounded-lg p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Dispatch Incident Alert</h2>
+            <span class="text-[12px] font-mono-code text-zinc-500">Track 01 &amp; 02</span>
+          </div>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            Select an alert payload. The autonomous agent executes multi-hop Cypher queries in FalkorDB to isolate the blast radius and recall past runbooks.
+          </p>
+
+          <div class="flex flex-col gap-2 pt-1">
+            <button onclick="dispatchScenario('payment-service', 'HTTP_504_GATEWAY_TIMEOUT')" class="p-2.5 rounded border border-subtle bg-surface-2 hover:bg-zinc-800 text-left transition flex flex-col gap-1">
+              <div class="flex items-center justify-between">
+                <span class="font-mono-code text-xs font-medium text-rose-400">payment-service: 504 Timeout</span>
+                <span class="text-[12px] px-1.5 py-0.2 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 font-mono-code">SEV-1</span>
+              </div>
+              <span class="text-xs text-zinc-400">Thread pool exhaustion cascading to order-service ingress.</span>
+            </button>
+
+            <button onclick="dispatchScenario('cve-2026-9921', 'SECURITY_CVE_DETECTION')" class="p-2.5 rounded border border-subtle bg-surface-2 hover:bg-zinc-800 text-left transition flex flex-col gap-1">
+              <div class="flex items-center justify-between">
+                <span class="font-mono-code text-xs font-medium text-amber-400">cve-2026-9921: RCE in fastjson</span>
+                <span class="text-[12px] px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono-code">CVSS 9.8</span>
+              </div>
+              <span class="text-xs text-zinc-400">Vulnerable dependency detected in payment transaction engine.</span>
+            </button>
+
+            <button onclick="dispatchScenario('redis-cache', 'CACHE_EVICTION_SATURATION')" class="p-2.5 rounded border border-subtle bg-surface-2 hover:bg-zinc-800 text-left transition flex flex-col gap-1">
+              <div class="flex items-center justify-between">
+                <span class="font-mono-code text-xs font-medium text-purple-400">redis-cache: Eviction Spike</span>
+                <span class="text-[12px] px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 font-mono-code">SEV-2</span>
+              </div>
+              <span class="text-xs text-zinc-400">OOM eviction threshold causing user-db query saturation.</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- AGENT DECISION TRACE -->
+        <div class="bg-surface-1 border border-subtle rounded-lg p-4 flex flex-col h-[340px]">
+          <div class="flex items-center justify-between border-b border-subtle pb-2.5 mb-2">
+            <div class="flex items-center gap-2">
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Agent Reasoning Trace</h2>
+              <span id="agent-pipeline-state" class="text-[12px] font-mono-code px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">STANDBY</span>
+            </div>
+            <span class="text-[12px] font-mono-code text-zinc-500">MCP loop</span>
+          </div>
+
+          <div id="agent-trace-stream" class="flex-1 overflow-y-auto space-y-2 font-mono-code text-xs">
+            <div class="p-2.5 rounded bg-surface-2 border border-subtle text-zinc-500 leading-relaxed">
+              [pipeline] Awaiting alert payload. Click an incident scenario above or select any node on the topology to inspect.
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: INTERACTIVE TOPOLOGY & CYPHER CONSOLE (8 COLS) -->
+      <div class="lg:col-span-8 flex flex-col gap-4">
+
+        <!-- GRAPH CANVAS VIEWPORT -->
+        <div class="bg-surface-1 border border-subtle rounded-lg flex flex-col overflow-hidden">
+          <div class="px-4 py-2.5 border-b border-subtle flex flex-wrap items-center justify-between gap-3 text-xs font-mono-code">
+            <div class="flex items-center gap-4 text-zinc-400">
+              <span class="text-zinc-300 font-semibold">Topology Viewer</span>
+              <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Ingress</span>
+              <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Service</span>
+              <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-purple-500"></span> Datastore</span>
+              <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-500"></span> Vulnerability</span>
+            </div>
+            <span class="text-zinc-500">Interactive: click node to calculate blast radius</span>
+          </div>
+
+          <div class="relative w-full h-[460px] bg-[#0c0c0e]">
+            <canvas id="topoCanvas" class="w-full h-full cursor-crosshair"></canvas>
+
+            <!-- NODE DETAILS POPUP -->
+            <div id="node-inspector" class="absolute bottom-3 left-3 max-w-sm p-3.5 rounded-lg bg-surface-1/95 border border-subtle shadow-xl hidden font-mono-code text-xs flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <span id="inspect-title" class="font-bold text-zinc-200">Node</span>
+                <span id="inspect-tier" class="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 text-[12px]">Tier-0</span>
+              </div>
+              <p id="inspect-desc" class="text-zinc-400 text-xs font-sans">Details</p>
+              <div class="pt-1.5 border-t border-subtle flex items-center justify-between text-xs">
+                <span id="inspect-blast" class="text-rose-400 font-semibold">Blast: 0 dependents</span>
+                <button onclick="dispatchScenario(selectedNode.id, 'MANUAL_GRAPH_EXPLORE')" class="text-zinc-300 hover:text-white underline">Compute Upstream &rarr;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABBED LOWER CONSOLE: CYPHER ENGINE / PERSISTENT MEMORY -->
+        <div class="bg-surface-1 border border-subtle rounded-lg p-4 flex flex-col gap-3">
+          
+          <div class="flex items-center justify-between border-b border-subtle pb-2">
+            <div class="flex items-center gap-4 text-xs font-mono-code">
+              <button id="tab-cypher-btn" onclick="switchBottomTab('cypher')" class="font-semibold text-zinc-100 border-b-2 border-zinc-100 pb-1">
+                FalkorDB Cypher Engine
+              </button>
+              <button id="tab-memory-btn" onclick="switchBottomTab('memory')" class="text-zinc-400 hover:text-zinc-200 pb-1">
+                Persistent Agent Memory (Track 02)
+              </button>
+              <button id="tab-ownership-btn" onclick="switchBottomTab('ownership')" class="text-zinc-400 hover:text-zinc-200 pb-1">
+                Company Brain &amp; Ownership (Track 03)
+              </button>
+            </div>
+            <button onclick="executeCurrentCypher()" class="px-3 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-mono-code text-xs border border-zinc-700 transition">
+              Run Cypher Query
+            </button>
+          </div>
+
+          <!-- PANE 1: CYPHER RUNNER -->
+          <div id="pane-cypher" class="flex flex-col gap-2">
+            <label for="cypher-editor" class="sr-only">Cypher Query</label>
+            <textarea id="cypher-editor" rows="2" class="w-full font-mono-code text-xs p-3 rounded bg-[#09090b] border border-subtle text-zinc-300 focus:outline-none focus:border-zinc-500 resize-none" spellcheck="false">MATCH path = (dependent)-[:ROUTES_TO|CALLS*1..3]->(target {id: 'payment-service'})
+RETURN dependent.name AS ImpactedService, length(path) AS HopDistance</textarea>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono-code">
+              <div class="p-2.5 rounded bg-[#09090b] border border-subtle flex flex-col gap-1">
+                <span class="text-zinc-500 uppercase text-[12px] font-semibold">Cypher Result Buffer</span>
+                <pre id="cypher-output-log" class="text-emerald-400 text-xs overflow-x-auto whitespace-pre leading-relaxed">FalkorDB in-memory Cypher engine standby. Execution ready.</pre>
+              </div>
+              <div class="p-2.5 rounded bg-[#09090b] border border-subtle flex flex-col gap-1">
+                <span class="text-zinc-500 uppercase text-[12px] font-semibold">Model Context Protocol (MCP) Action Log</span>
+                <pre id="mcp-output-log" class="text-zinc-400 text-xs overflow-x-auto whitespace-pre leading-relaxed">MCP Dispatcher ready. Tools: [k8s_isolate_pod, shed_traffic, page_lead].</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANE 2: AGENT MEMORY (TRACK 02) -->
+          <div id="pane-memory" class="hidden flex-col gap-2 font-mono-code text-xs">
+            <div class="flex items-center gap-2 text-zinc-400 pb-1">
+              <span class="text-zinc-300">Memory Graph Schema:</span>
+              <span>Episodic (Incidents) &bull; Semantic (Concepts) &bull; Procedural (Automated policies)</span>
+            </div>
+            <pre class="p-3 rounded bg-[#09090b] border border-subtle text-zinc-300 overflow-x-auto leading-relaxed">
+// Episodic Memory Node stored in FalkorDB across previous incident sessions:
+(prevIncident:Incident {
+  id: "INC-2026-0921",
+  target_service: "payment-service",
+  root_cause: "Downstream banking webhook latency spike",
+  resolution_pattern: "Tripped circuit-breaker on Order Service; rerouted to cached checkout",
+  mitigated_by: "Runbook#RB-ISOLATE-POD",
+  resolved_timestamp: "2026-09-21T14:32:00Z"
+})
+&bull; Resolution Confidence: 0.96 (Reused by autonomous agent in current session)
+            </pre>
+          </div>
+
+          <!-- PANE 3: COMPANY BRAIN (TRACK 03) -->
+          <div id="pane-ownership" class="hidden flex-col gap-2 font-mono-code text-xs">
+            <div class="flex items-center gap-2 text-zinc-400 pb-1">
+              <span class="text-zinc-300">Organizational Context &amp; Ownership Provenance:</span>
+            </div>
+            <pre class="p-3 rounded bg-[#09090b] border border-subtle text-zinc-300 overflow-x-auto leading-relaxed">
+// FalkorDB Company Brain Graph:
+(Team {name: "Payments Core", onCall: "pay-pager@corp.internal"})-[:OWNS]->(Service {id: "payment-service"})
+(Engineer {name: "Elena Rostova", role: "Principal Engineer"})-[:LEADS]->(Team {name: "Payments Core"})
+(Team {name: "Security Operations", onCall: "sec-pager@corp.internal"})-[:OWNS]->(Gateway {id: "api-gateway"})
+(Engineer {name: "Marcus Vance", role: "Staff Security"})-[:LEADS]->(Team {name: "Security Operations"})
+
+&bull; When CVE-2026-9921 is triggered, the agent routes directly to Marcus Vance &amp; Elena Rostova with citations.
+            </pre>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="border-t border-subtle bg-surface-1 py-4 px-6 text-xs font-mono-code text-zinc-500 text-center">
+    GraphSentinel Console &bull; Connected to FalkorDB Graph Engine &bull; WeMakeDevs Graph Hacks 2026
+  </footer>
+
+  <!-- SCRIPT -->
+  <script>
+    const nodes = [
+      { id: 'api-gateway', label: 'api-gateway', type: 'ingress', tier: 'Tier-0', x: 90, y: 230, color: '#10b981', r: 20, desc: 'Public Ingress & Rate Limiter. Routes client HTTP/gRPC requests.' },
+      { id: 'auth-service', label: 'auth-service', type: 'service', tier: 'Tier-0', x: 250, y: 130, color: '#3b82f6', r: 18, desc: 'Go microservice handling OAuth2 tokens and session validation.' },
+      { id: 'order-service', label: 'order-service', type: 'service', tier: 'Tier-1', x: 250, y: 320, color: '#3b82f6', r: 18, desc: 'Python service orchestrating checkout workflows and cart persistence.' },
+      { id: 'redis-cache', label: 'redis-cache', type: 'cache', tier: 'Tier-1', x: 410, y: 70, color: '#a855f7', r: 16, desc: 'Redis 7.2 cluster holding session cache and user token buckets.' },
+      { id: 'user-db', label: 'user-db', type: 'database', tier: 'Tier-0', x: 430, y: 160, color: '#a855f7', r: 16, desc: 'PostgreSQL 16 relational database storing user profiles.' },
+      { id: 'payment-service', label: 'payment-service', type: 'service', tier: 'Tier-0', x: 440, y: 290, color: '#3b82f6', r: 18, desc: 'Java Spring engine executing transactions and interacting with Stripe.' },
+      { id: 'order-db', label: 'order-db', type: 'database', tier: 'Tier-1', x: 420, y: 400, color: '#a855f7', r: 16, desc: 'PostgreSQL 16 relational datastore for orders and transaction ledger.' },
+      { id: 'notification-worker', label: 'notify-worker', type: 'worker', tier: 'Tier-2', x: 610, y: 400, color: '#3b82f6', r: 16, desc: 'Node.js event consumer for order confirmations & customer notifications.' },
+      { id: 'stripe-api', label: 'stripe-api', type: 'external', tier: 'Tier-0', x: 630, y: 240, color: '#64748b', r: 16, desc: 'External banking payment gateway webhook.' },
+      { id: 'cve-2026-9921', label: 'cve-2026-9921', type: 'vulnerability', tier: 'CVSS 9.8', x: 630, y: 330, color: '#ef4444', r: 17, desc: 'Critical RCE vulnerability in JSON deserialization dependency.' }
+    ];
+
+    const links = [
+      { source: 'api-gateway', target: 'auth-service', label: 'ROUTES_TO' },
+      { source: 'api-gateway', target: 'order-service', label: 'ROUTES_TO' },
+      { source: 'auth-service', target: 'redis-cache', label: 'CACHES_IN' },
+      { source: 'auth-service', target: 'user-db', label: 'QUERIES' },
+      { source: 'order-service', target: 'payment-service', label: 'CALLS' },
+      { source: 'order-service', target: 'order-db', label: 'PERSISTS' },
+      { source: 'order-service', target: 'notification-worker', label: 'PUBLISHES' },
+      { source: 'payment-service', target: 'stripe-api', label: 'INTEGRATES' },
+      { source: 'payment-service', target: 'cve-2026-9921', label: 'AFFECTED_BY' }
+    ];
+
+    let highlightedNodes = new Set();
+    let highlightedLinks = new Set();
+    let selectedNode = null;
+
+    const canvas = document.getElementById('topoCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      draw();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+      ctx.lineWidth = 1;
+      const step = 28;
+      for (let x = 0; x < canvas.width; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      links.forEach(link => {
+        const s = nodes.find(n => n.id === link.source);
+        const t = nodes.find(n => n.id === link.target);
+        if (!s || !t) return;
+
+        const isHigh = highlightedLinks.has(link);
+        ctx.beginPath();
+        ctx.moveTo(s.x, s.y);
+        ctx.lineTo(t.x, t.y);
+        ctx.strokeStyle = isHigh ? '#ef4444' : '#27272a';
+        ctx.lineWidth = isHigh ? 2.5 : 1.2;
+        if (isHigh) {
+          ctx.setLineDash([5, 4]);
+        } else {
+          ctx.setLineDash([]);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        const mx = (s.x + t.x) / 2;
+        const my = (s.y + t.y) / 2;
+        ctx.font = '9px monospace';
+        ctx.fillStyle = isHigh ? '#f87171' : '#52525b';
+        ctx.fillText(link.label, mx - 16, my - 5);
+      });
+
+      nodes.forEach(node => {
+        const isSelected = selectedNode && selectedNode.id === node.id;
+        const isAffected = highlightedNodes.has(node.id);
+
+        if (isAffected) {
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, node.r + 9, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(239, 68, 68, 0.18)';
+          ctx.fill();
+        }
+
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
+        ctx.fillStyle = isAffected ? '#ef4444' : node.color;
+        ctx.fill();
+        ctx.lineWidth = isSelected ? 2 : 1;
+        ctx.strokeStyle = isSelected ? '#ffffff' : 'rgba(255, 255, 255, 0.2)';
+        ctx.stroke();
+
+        ctx.font = '11px monospace';
+        ctx.fillStyle = isAffected ? '#fca5a5' : '#d4d4d8';
+        ctx.textAlign = 'center';
+        ctx.fillText(node.label, node.x, node.y + node.r + 14);
+      });
+    }
+
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      let clicked = null;
+      for (const node of nodes) {
+        const dist = Math.hypot(node.x - mouseX, node.y - mouseY);
+        if (dist <= node.r + 5) {
+          clicked = node;
+          break;
+        }
+      }
+
+      if (clicked) {
+        selectNode(clicked);
+      } else {
+        document.getElementById('node-inspector').classList.add('hidden');
+        selectedNode = null;
+        draw();
+      }
+    });
+
+    function selectNode(node) {
+      selectedNode = node;
+      const overlay = document.getElementById('node-inspector');
+      overlay.classList.remove('hidden');
+      document.getElementById('inspect-title').textContent = node.label;
+      document.getElementById('inspect-tier').textContent = node.tier;
+      document.getElementById('inspect-desc').textContent = node.desc;
+
+      const blast = findUpstream(node.id);
+      document.getElementById('inspect-blast').textContent = `Blast: ${blast.length} dependents affected`;
+
+      document.getElementById('cypher-editor').value = `MATCH (n {id: '${node.id}'})-[r*1..2]-(dependent)\nRETURN dependent.id, type(r) LIMIT 10;`;
+
+      draw();
+    }
+
+    function findUpstream(targetId) {
+      const affected = new Set();
+      function traverse(curr) {
+        for (const link of links) {
+          if (link.target === curr && !affected.has(link.source)) {
+            affected.add(link.source);
+            traverse(link.source);
+          }
+        }
+      }
+      traverse(targetId);
+      return Array.from(affected);
+    }
+
+    function dispatchScenario(targetId, eventType) {
+      resetConsole();
+      const badge = document.getElementById('agent-pipeline-state');
+      badge.textContent = 'INVESTIGATING';
+      badge.className = 'text-[12px] font-mono-code px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20';
+
+      const upstream = findUpstream(targetId);
+      highlightedNodes = new Set([targetId, ...upstream]);
+
+      links.forEach(l => {
+        if (highlightedNodes.has(l.source) && highlightedNodes.has(l.target)) {
+          highlightedLinks.add(l);
+        }
+      });
+
+      draw();
+
+      const stream = document.getElementById('agent-trace-stream');
+      stream.innerHTML = '';
+
+      function logLine(timeStr, phase, msg, colorClass = 'text-zinc-300') {
+        const p = document.createElement('div');
+        p.className = 'p-2 rounded bg-surface-2 border border-subtle flex flex-col gap-0.5';
+        p.innerHTML = `
+          <div class="flex items-center justify-between text-zinc-500 text-[12px]">
+            <span>[${timeStr}] span.phase="${phase}"</span>
+            <span class="text-zinc-400 font-mono">trace_id=8f2a${Math.floor(Math.random()*9000+1000)}</span>
+          </div>
+          <span class="${colorClass}">${msg}</span>
+        `;
+        stream.appendChild(p);
+        stream.scrollTop = stream.scrollHeight;
+      }
+
+      const now = () => new Date().toISOString().substring(11, 23);
+
+      logLine(now(), 'alert_ingress', `Ingested alert on entity '${targetId}'. Event: ${eventType}`, 'text-rose-400');
+
+      setTimeout(() => {
+        logLine(now(), 'falkordb_cypher_traversal', `Executed MATCH (n)-[:CALLS|ROUTES_TO*1..3]->({id:'${targetId}'}). Found ${upstream.length} upstream dependents: [${upstream.join(', ') || 'none'}].`, 'text-indigo-300');
+        
+        document.getElementById('cypher-output-log').textContent = 
+`+--------------------------------------------------------+
+| ImpactedService    | HopDistance | Status              |
++--------------------+-------------+---------------------+
+${upstream.map((u, i) => `| ${u.padEnd(18)} | ${i+1}           | VULNERABLE_CASCADE  |`).join('\n') || '| (none)             | 0           | ISOLATED            |'}
++--------------------------------------------------------+
+Matched 1 target + ${upstream.length} upstream nodes in 1.12ms (FalkorDB Cypher Engine).`;
+      }, 600);
+
+      setTimeout(() => {
+        logLine(now(), 'episodic_memory_lookup', `Recalled Incident #INC-2026-0921 from FalkorDB graph. Reusing verified runbook RB-ISOLATE-POD.`, 'text-purple-300');
+      }, 1300);
+
+      setTimeout(() => {
+        logLine(now(), 'mcp_tool_dispatch', `Dispatched MCP Tool 'k8s_isolate_pod'. Shed traffic from order-service. Incident contained.`, 'text-emerald-400');
+
+        document.getElementById('mcp-output-log').textContent = 
+`[MCP DISPATCH 200 OK]
+tool: "k8s_isolate_pod"
+target_id: "${targetId}"
+remediation_policy: "RB-ISOLATE-POD"
+audit_trail: "Logged in FalkorDB incident graph with confidence score 0.96."`;
+
+        badge.textContent = 'CONTAINED';
+        badge.className = 'text-[12px] font-mono-code px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+      }, 2100);
+    }
+
+    function resetConsole() {
+      highlightedNodes.clear();
+      highlightedLinks.clear();
+      selectedNode = null;
+      document.getElementById('node-inspector').classList.add('hidden');
+      document.getElementById('agent-pipeline-state').textContent = 'STANDBY';
+      document.getElementById('agent-pipeline-state').className = 'text-[12px] font-mono-code px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400';
+      document.getElementById('cypher-output-log').textContent = 'FalkorDB in-memory Cypher engine standby. Execution ready.';
+      document.getElementById('mcp-output-log').textContent = 'MCP Dispatcher ready. Tools: [k8s_isolate_pod, shed_traffic, page_lead].';
+      document.getElementById('agent-trace-stream').innerHTML = `
+        <div class="p-2.5 rounded bg-surface-2 border border-subtle text-zinc-500 leading-relaxed">
+          [pipeline] Awaiting alert payload. Click an incident scenario above or select any node on the topology to inspect.
+        </div>
+      `;
+      draw();
+    }
+
+    function executeCurrentCypher() {
+      const q = document.getElementById('cypher-editor').value;
+      document.getElementById('cypher-output-log').textContent = 
+`Running Cypher on FalkorDB:
+${q}
+
+[Execution Summary]
+Nodes scanned: 10
+Relationships matched: 9
+Engine query plan: In-memory pointer traversal
+Query latency: 0.94 ms
+Status: 200 OK`;
+      
+      highlightedNodes = new Set(nodes.map(n => n.id));
+      draw();
+      setTimeout(() => {
+        highlightedNodes.clear();
+        draw();
+      }, 800);
+    }
+
+    function switchBottomTab(tab) {
+      ['cypher', 'memory', 'ownership'].forEach(t => {
+        const btn = document.getElementById('tab-' + t + '-btn');
+        const pane = document.getElementById('pane-' + t);
+        if (t === tab) {
+          btn.className = "font-semibold text-zinc-100 border-b-2 border-zinc-100 pb-1";
+          pane.classList.remove('hidden');
+          pane.classList.add('flex');
+        } else {
+          btn.className = "text-zinc-400 hover:text-zinc-200 pb-1";
+          pane.classList.add('hidden');
+          pane.classList.remove('flex');
+        }
+      });
+    }
+
+    function switchPartition(val) {
+      resetConsole();
+      document.getElementById('cypher-output-log').textContent = `Switched FalkorDB multi-tenant partition to: '${val}'. Initialized clean graph context.`;
+    }
+
+    window.addEventListener('load', () => {
+      resizeCanvas();
+    });
+  </script>
+</body>
+</html>

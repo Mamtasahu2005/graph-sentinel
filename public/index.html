@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GraphSentinel &mdash; Graph Context Layer for Autonomous AI Agents</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    /* Handcrafted engineering aesthetic */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0b0d12; }
+    ::-webkit-scrollbar-thumb { background: #232834; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #353c4d; }
+
+    body {
+      background-color: #0b0d12;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .font-mono-code {
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    }
+
+    /* Subtle hairline borders */
+    .border-subtle { border-color: rgba(255, 255, 255, 0.07); }
+    .border-active { border-color: rgba(255, 255, 255, 0.16); }
+
+    .bg-canvas { background-color: #0b0d12; }
+    .bg-panel { background-color: #12151c; }
+    .bg-panel-muted { background-color: #181c25; }
+    .bg-code { background-color: #0d1017; }
+
+    /* Dot grid overlay */
+    .hero-dots {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+  </style>
+</head>
+<body class="bg-canvas text-slate-200 min-h-screen flex flex-col selection:bg-slate-700 selection:text-white">
+
+  <!-- TOP ANNOUNCEMENT TICKER -->
+  <aside aria-label="Hackathon announcement" class="border-b border-subtle bg-panel py-1.5 px-4 text-xs font-mono-code text-slate-400">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span class="text-slate-300">WeMakeDevs &times; FalkorDB Graph Hacks 2026 Submission</span>
+        <span class="text-slate-600 hidden sm:inline">&bull;</span>
+        <span class="text-slate-400 hidden sm:inline">October 15&ndash;18, 2026</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="/app.html" class="text-slate-200 hover:text-white underline font-medium">Open Live Investigation Console &rarr;</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- NAVIGATION -->
+  <header class="border-b border-subtle bg-canvas/90 sticky top-0 z-50 px-6 py-3.5 backdrop-blur-md">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-6">
+      
+      <!-- LOGO -->
+      <a href="/" class="flex items-center gap-3 group">
+        <div class="w-7 h-7 rounded border border-subtle bg-panel flex items-center justify-center text-slate-100 font-bold text-xs font-mono-code group-hover:border-active transition">
+          GS
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span class="font-semibold text-sm tracking-tight text-white">GraphSentinel</span>
+          <span class="text-xs text-slate-500 font-mono-code hidden sm:inline">for FalkorDB</span>
+        </div>
+      </a>
+
+      <!-- NAV LINKS -->
+      <nav class="hidden md:flex items-center gap-6 text-xs text-slate-400 font-medium">
+        <a href="#why-graphs" class="hover:text-slate-200 transition">The Problem</a>
+        <a href="#interactive-workbench" class="hover:text-slate-200 transition">Live Demo</a>
+        <a href="#code-sdk" class="hover:text-slate-200 transition">Python SDK</a>
+        <a href="#hackathon-tracks" class="hover:text-slate-200 transition">Track Alignment</a>
+        <a href="#docker-run" class="hover:text-slate-200 transition">Deployment</a>
+      </nav>
+
+      <!-- CTA -->
+      <div class="flex items-center gap-3">
+        <a href="/app.html" class="px-3.5 py-1.5 rounded border border-slate-300 bg-white hover:bg-slate-100 text-slate-950 font-semibold text-xs transition shadow-sm">
+          Launch Console
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="border-b border-subtle py-16 md:py-24 px-6 hero-dots relative">
+    <div class="max-w-4xl mx-auto flex flex-col items-center text-center">
+
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-subtle bg-panel text-slate-300 text-xs font-mono-code mb-6">
+        <span class="text-emerald-400 font-bold">FalkorDB</span>
+        <span class="text-slate-600">/</span>
+        <span>Context Engine for Autonomous Agents</span>
+      </div>
+
+      <h1 class="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-[1.12]">
+        Vector databases give agents memory.<br>
+        Graphs give them an architecture map.
+      </h1>
+
+      <p class="mt-6 text-sm sm:text-base text-slate-400 max-w-2xl leading-relaxed">
+        When production microservices fail, the root cause is rarely the service throwing the 500 error. GraphSentinel models infrastructure topology, team ownership, and past runbooks in <strong>FalkorDB</strong>&mdash;enabling autonomous agents to traverse multi-hop blast radii and resolve outages without guessing.
+      </p>
+
+      <div class="flex flex-wrap items-center justify-center gap-3 mt-8">
+        <a href="/app.html" class="px-5 py-2.5 rounded bg-white hover:bg-slate-100 text-slate-950 font-semibold text-xs transition shadow-sm">
+          Launch Interactive Console &rarr;
+        </a>
+        <a href="#interactive-workbench" class="px-5 py-2.5 rounded border border-subtle bg-panel hover:bg-panel-muted text-slate-300 text-xs font-medium transition">
+          Test Live Incident Simulator
+        </a>
+      </div>
+
+      <!-- KEY SPECS BANNER -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-14 w-full text-left font-mono-code text-xs">
+        <div class="p-3.5 rounded border border-subtle bg-panel flex flex-col gap-1">
+          <span class="text-slate-500 text-[12px] uppercase">Traversal Latency</span>
+          <span class="text-emerald-400 font-semibold text-sm">0.94 ms P99</span>
+          <span class="text-slate-500 text-[12px]">In-memory pointer hops</span>
+        </div>
+        <div class="p-3.5 rounded border border-subtle bg-panel flex flex-col gap-1">
+          <span class="text-slate-500 text-[12px] uppercase">Query Language</span>
+          <span class="text-slate-200 font-semibold text-sm">OpenCypher</span>
+          <span class="text-slate-500 text-[12px]">Deterministic path match</span>
+        </div>
+        <div class="p-3.5 rounded border border-subtle bg-panel flex flex-col gap-1">
+          <span class="text-slate-500 text-[12px] uppercase">Cross-Session State</span>
+          <span class="text-indigo-300 font-semibold text-sm">Episodic Graph</span>
+          <span class="text-slate-500 text-[12px]">Persistent incident history</span>
+        </div>
+        <div class="p-3.5 rounded border border-subtle bg-panel flex flex-col gap-1">
+          <span class="text-slate-500 text-[12px] uppercase">Action Interface</span>
+          <span class="text-slate-200 font-semibold text-sm">MCP Tools</span>
+          <span class="text-slate-500 text-[12px]">Automated runbook dispatch</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- THE REAL PROBLEM STORY -->
+  <section id="why-graphs" class="py-16 px-6 border-b border-subtle bg-panel">
+    <div class="max-w-5xl mx-auto flex flex-col gap-10">
+      
+      <div class="max-w-2xl">
+        <span class="text-xs font-mono-code uppercase tracking-wider text-slate-500">The Problem with Vector RAG</span>
+        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mt-1">
+          Why vector similarity is the wrong tool for system infrastructure
+        </h2>
+        <p class="mt-3 text-xs sm:text-sm text-slate-400 leading-relaxed">
+          Vector databases calculate text cosine distance. But infrastructure dependencies aren't semantic similarity problems&mdash;they are directed acyclic graphs.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 font-mono-code text-xs">
+        
+        <!-- HOW VECTOR RAG FAILS -->
+        <div class="p-5 rounded border border-subtle bg-code flex flex-col gap-3">
+          <div class="flex items-center justify-between pb-2 border-b border-subtle">
+            <span class="text-rose-400 font-semibold uppercase text-[12px]">What Vector RAG Sees During an Outage</span>
+            <span class="text-slate-600">Cosine Match</span>
+          </div>
+          <p class="text-slate-400 font-sans text-xs leading-relaxed">
+            When <code>payment-service</code> throws 504 timeouts, a vector search retrieves fragmented wiki chunks mentioning "payments", "Stripe API", or "credit card".
+          </p>
+          <div class="p-3 rounded bg-panel border border-subtle text-slate-400 text-[12px] leading-relaxed">
+            &bull; Similarity: 0.81 &rarr; "Billing Policy v2.pdf"<br>
+            &bull; Similarity: 0.77 &rarr; "How to configure Stripe webhooks"<br>
+            <span class="text-rose-400">&times; Result: The agent has no idea that <code>order-service</code> depends on <code>payment-service</code>, or that the failure will take down the API gateway.</span>
+          </div>
+        </div>
+
+        <!-- HOW FALKORDB SOLVES IT -->
+        <div class="p-5 rounded border border-subtle bg-code flex flex-col gap-3">
+          <div class="flex items-center justify-between pb-2 border-b border-subtle">
+            <span class="text-emerald-400 font-semibold uppercase text-[12px]">What GraphSentinel Sees in FalkorDB</span>
+            <span class="text-slate-600">Deterministic Pointer</span>
+          </div>
+          <p class="text-slate-400 font-sans text-xs leading-relaxed">
+            The agent runs a single Cypher traversal following physical edges across the microservice mesh in 0.94 milliseconds.
+          </p>
+          <div class="p-3 rounded bg-panel border border-subtle text-slate-300 text-[12px] leading-relaxed">
+            MATCH (target:Service {id: 'payment-service'})<br>
+            &lt;-[:CALLS*1..3]-(upstream:Service)<br>
+            RETURN upstream.id, length(path)<br>
+            <span class="text-emerald-400">&check; Exact blast radius: [order-service &rarr; api-gateway].</span><br>
+            <span class="text-indigo-300">&check; Recalled Incident #INC-2026-0921 mitigation runbook.</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- INTERACTIVE WORKBENCH PREVIEW -->
+  <section id="interactive-workbench" class="py-16 px-6 border-b border-subtle bg-canvas">
+    <div class="max-w-5xl mx-auto flex flex-col gap-6">
+      
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <span class="text-xs font-mono-code uppercase tracking-wider text-slate-500">Live Simulator</span>
+          <h2 class="text-2xl font-bold tracking-tight text-white mt-1">
+            Test the blast radius engine right here
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">Select an incident to simulate the agent's graph traversal:</p>
+        </div>
+        <a href="/app.html" class="px-3.5 py-1.5 rounded border border-subtle bg-panel hover:bg-panel-muted text-xs text-slate-200 font-medium transition self-start sm:self-auto">
+          Open Fullscreen Console &rarr;
+        </a>
+      </div>
+
+      <!-- WORKBENCH CARD -->
+      <div class="border border-subtle rounded-lg bg-panel overflow-hidden shadow-2xl flex flex-col">
+        
+        <!-- TOOLBAR -->
+        <div class="px-4 py-3 border-b border-subtle bg-panel-muted flex flex-wrap items-center justify-between gap-3 text-xs font-mono-code">
+          <div class="flex items-center gap-2">
+            <span class="text-slate-400">Trigger Incident:</span>
+            <button onclick="runScenario('payment-service')" id="btn-scen-payment" class="px-2.5 py-1 rounded bg-rose-500/10 border border-rose-500/30 text-rose-300 font-semibold hover:bg-rose-500/20 transition">
+              payment-service (504 Timeout)
+            </button>
+            <button onclick="runScenario('cve-2026-9921')" id="btn-scen-cve" class="px-2.5 py-1 rounded bg-surface-2 border border-subtle text-amber-300 hover:bg-zinc-800 transition">
+              cve-2026-9921 (RCE Exploit)
+            </button>
+            <button onclick="runScenario('redis-cache')" id="btn-scen-redis" class="px-2.5 py-1 rounded bg-surface-2 border border-subtle text-purple-300 hover:bg-zinc-800 transition">
+              redis-cache (Eviction Storm)
+            </button>
+          </div>
+          <span id="demo-status" class="text-emerald-400">falkordb: ready</span>
+        </div>
+
+        <!-- SPLIT VIEW: CYPHER QUERY + COMPUTED RESULT -->
+        <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-subtle bg-code font-mono-code text-xs">
+          
+          <!-- LEFT: GENERATED CYPHER -->
+          <div class="p-4 flex flex-col gap-3">
+            <div class="text-slate-500 text-[12px] uppercase font-semibold">1. Executed FalkorDB Cypher Query</div>
+            <pre id="demo-cypher" class="text-indigo-300 leading-relaxed overflow-x-auto whitespace-pre">MATCH path = (dependent)-[:CALLS|ROUTES_TO*1..3]->(target {id: 'payment-service'})
+RETURN dependent.id AS ImpactedNode, length(path) AS Depth;</pre>
+
+            <div class="pt-3 border-t border-subtle flex flex-col gap-1 text-[12px]">
+              <span class="text-slate-500 uppercase font-semibold">Execution Metrics</span>
+              <span class="text-slate-300">Engine: FalkorDB (In-Memory Graph Engine)</span>
+              <span class="text-slate-300">Traversal Latency: <strong class="text-emerald-400">0.94 ms</strong></span>
+            </div>
+          </div>
+
+          <!-- RIGHT: RESOLVED BLAST RADIUS & RUNBOOK RECALL -->
+          <div class="p-4 flex flex-col gap-3">
+            <div class="text-slate-500 text-[12px] uppercase font-semibold">2. Resolved Topology &amp; MCP Action</div>
+            
+            <div class="flex flex-col gap-2">
+              <div class="p-2.5 rounded bg-panel border border-subtle flex flex-col gap-1">
+                <span class="text-rose-400 font-semibold text-[12px]">Cascading Blast Radius (Upstream Impact):</span>
+                <span id="demo-blast" class="text-slate-300">&bull; order-service (1 hop &bull; Tier-1)<br>&bull; api-gateway (2 hops &bull; Tier-0 Ingress)</span>
+              </div>
+
+              <div class="p-2.5 rounded bg-panel border border-subtle flex flex-col gap-1">
+                <span class="text-purple-300 font-semibold text-[12px]">Episodic Memory Recall (Track 02):</span>
+                <span id="demo-memory" class="text-slate-300">Recalled Incident #INC-2026-0921: "Tripped circuit-breaker on order-service; rerouted to cache."</span>
+              </div>
+
+              <div class="p-2.5 rounded bg-panel border border-subtle flex flex-col gap-1">
+                <span class="text-emerald-400 font-semibold text-[12px]">Dispatched MCP Action:</span>
+                <span id="demo-mcp" class="text-slate-300">Tool: <code>k8s_isolate_pod(target='payment-service')</code> &bull; Status: Executed</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PYTHON SDK SNIPPET SECTION -->
+  <section id="code-sdk" class="py-16 px-6 border-b border-subtle bg-panel">
+    <div class="max-w-5xl mx-auto flex flex-col gap-6">
+      
+      <div class="max-w-2xl">
+        <span class="text-xs font-mono-code uppercase tracking-wider text-slate-500">Developer Experience</span>
+        <h2 class="text-2xl font-bold tracking-tight text-white mt-1">
+          Simple Python SDK integration
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
+          GraphSentinel interacts with FalkorDB using the standard Python client. No proprietary query wrappers or black-box abstractions.
+        </p>
+      </div>
+
+      <div class="p-4 rounded-lg bg-code border border-subtle font-mono-code text-xs text-slate-300 overflow-x-auto leading-relaxed shadow-lg">
+<span class="text-slate-500"># Install: pip install falkordb</span>
+<span class="text-indigo-400">from</span> falkordb <span class="text-indigo-400">import</span> FalkorDB
+
+<span class="text-slate-500"># Connect to FalkorDB instance</span>
+client = FalkorDB(host=<span class="text-emerald-400">"localhost"</span>, port=<span class="text-amber-400">6379</span>)
+graph = client.select_graph(<span class="text-emerald-400">"production-mesh"</span>)
+
+<span class="text-slate-500"># Run multi-hop blast radius traversal inside the agent loop</span>
+query = <span class="text-emerald-400">"""
+MATCH path = (root:Service {id: $service})<-[:CALLS*1..3]-(upstream:Service)
+RETURN upstream.id AS affected_service, length(path) AS hop_depth
+"""</span>
+
+result = graph.query(query, {<span class="text-emerald-400">"service"</span>: <span class="text-emerald-400">"payment-service"</span>})
+<span class="text-indigo-400">for</span> record <span class="text-indigo-400">in</span> result.result_set:
+    print(<span class="text-emerald-400">f"Impacted: {record[0]} at hop {record[1]}"</span>)
+      </div>
+
+    </div>
+  </section>
+
+  <!-- HACKATHON TRACKS ALIGNMENT -->
+  <section id="hackathon-tracks" class="py-16 px-6 border-b border-subtle bg-canvas">
+    <div class="max-w-5xl mx-auto flex flex-col gap-8">
+      
+      <div>
+        <span class="text-xs font-mono-code uppercase tracking-wider text-slate-500">Graph Hacks 2026</span>
+        <h2 class="text-2xl font-bold tracking-tight text-white mt-1">
+          Architected for all three hackathon tracks
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
+        
+        <!-- TRACK 1 -->
+        <div class="p-5 rounded border border-subtle bg-panel flex flex-col justify-between gap-4">
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center justify-between font-mono-code">
+              <span class="px-2 py-0.5 rounded bg-zinc-800 text-slate-300 border border-zinc-700">Track 01</span>
+              <span class="text-slate-400">Prize: iPhone 18 Pro</span>
+            </div>
+            <h3 class="font-bold text-sm text-white">Agents That Act on Connected Data</h3>
+            <p class="text-slate-400 leading-relaxed font-sans">
+              Autonomous multi-hop reasoning. The agent executes Cypher path algorithms to calculate cascading blast radii and triggers MCP tools based on topology.
+            </p>
+          </div>
+          <div class="pt-2 border-t border-subtle font-mono-code text-emerald-400 text-[12px]">
+            &check; Verified multi-hop reachability
+          </div>
+        </div>
+
+        <!-- TRACK 2 -->
+        <div class="p-5 rounded border border-subtle bg-panel flex flex-col justify-between gap-4">
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center justify-between font-mono-code">
+              <span class="px-2 py-0.5 rounded bg-zinc-800 text-slate-300 border border-zinc-700">Track 02</span>
+              <span class="text-slate-400">Prize: PS5 + GTA VI</span>
+            </div>
+            <h3 class="font-bold text-sm text-white">Agent Memory &amp; Coordination</h3>
+            <p class="text-slate-400 leading-relaxed font-sans">
+              Persistent cross-session episodic memory. The agent stores incident resolutions as new graph edges, reusing verified runbooks with multi-tenant isolation.
+            </p>
+          </div>
+          <div class="pt-2 border-t border-subtle font-mono-code text-indigo-400 text-[12px]">
+            &check; Cross-session episodic graph memory
+          </div>
+        </div>
+
+        <!-- TRACK 3 -->
+        <div class="p-5 rounded border border-subtle bg-panel flex flex-col justify-between gap-4">
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center justify-between font-mono-code">
+              <span class="px-2 py-0.5 rounded bg-zinc-800 text-slate-300 border border-zinc-700">Track 03</span>
+              <span class="text-slate-400">Prize: M6 Mac Mini</span>
+            </div>
+            <h3 class="font-bold text-sm text-white">Company Brain</h3>
+            <p class="text-slate-400 leading-relaxed font-sans">
+              Connects microservices, CVEs, team ownership, and on-call rotations (<code>Team &rarr; Lead &rarr; Pager</code>) with exact citations and provenance.
+            </p>
+          </div>
+          <div class="pt-2 border-t border-subtle font-mono-code text-amber-400 text-[12px]">
+            &check; Organizational ownership graph
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- DEPLOYMENT SECTION -->
+  <section id="docker-run" class="py-16 px-6 border-b border-subtle bg-panel">
+    <div class="max-w-5xl mx-auto flex flex-col gap-6 font-mono-code text-xs">
+      <div>
+        <span class="text-slate-500 uppercase tracking-wider">Turnkey Deployment</span>
+        <h2 class="text-xl font-bold text-white mt-1">Start FalkorDB &amp; GraphSentinel in 60 seconds</h2>
+      </div>
+
+      <div class="p-4 rounded bg-code border border-subtle text-slate-300 leading-loose overflow-x-auto">
+        <span class="text-slate-500"># Clone repo &amp; launch via Docker Compose</span><br>
+        git clone https://github.com/example/graph-sentinel.git<br>
+        cd graph-sentinel &amp;&amp; docker compose up -d<br><br>
+        <span class="text-slate-500"># Active services:</span><br>
+        &bull; GraphSentinel UI &amp; API: <a href="http://localhost:8080" class="text-emerald-400 underline">http://localhost:8080</a><br>
+        &bull; Investigation Console: <a href="http://localhost:8080/app.html" class="text-emerald-400 underline">http://localhost:8080/app.html</a><br>
+        &bull; FalkorDB Browser: <a href="http://localhost:3000" class="text-indigo-400 underline">http://localhost:3000</a><br>
+        &bull; FalkorDB Cypher Port: localhost:6379
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="/app.html" class="px-4 py-2 rounded bg-white hover:bg-slate-100 text-slate-950 font-semibold text-xs transition">
+          Open Investigation Console &rarr;
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="bg-canvas py-8 px-6 text-xs font-mono-code text-slate-500 text-center flex flex-col items-center gap-2">
+    <div>GraphSentinel &bull; Built with FalkorDB &bull; WeMakeDevs Graph Hacks 2026</div>
+    <div class="text-slate-600">Open source MIT License</div>
+  </footer>
+
+  <!-- SCRIPT -->
+  <script>
+    function runScenario(target) {
+      const cypherEl = document.getElementById('demo-cypher');
+      const blastEl = document.getElementById('demo-blast');
+      const memoryEl = document.getElementById('demo-memory');
+      const mcpEl = document.getElementById('demo-mcp');
+
+      // Update button styling
+      ['payment', 'cve', 'redis'].forEach(k => {
+        const b = document.getElementById('btn-scen-' + k);
+        if (target.includes(k)) {
+          b.className = "px-2.5 py-1 rounded bg-rose-500/10 border border-rose-500/30 text-rose-300 font-semibold";
+        } else {
+          b.className = "px-2.5 py-1 rounded bg-surface-2 border border-subtle text-slate-400 hover:bg-zinc-800";
+        }
+      });
+
+      if (target === 'payment-service') {
+        cypherEl.textContent = `MATCH path = (dependent)-[:CALLS|ROUTES_TO*1..3]->(target {id: 'payment-service'})\nRETURN dependent.id AS ImpactedNode, length(path) AS Depth;`;
+        blastEl.innerHTML = `&bull; order-service (1 hop &bull; Tier-1)<br>&bull; api-gateway (2 hops &bull; Tier-0 Ingress)`;
+        memoryEl.textContent = `Recalled Incident #INC-2026-0921: "Tripped circuit-breaker on order-service; rerouted to cache."`;
+        mcpEl.innerHTML = `Tool: <code>k8s_isolate_pod(target='payment-service')</code> &bull; Status: Executed`;
+      } else if (target === 'cve-2026-9921') {
+        cypherEl.textContent = `MATCH (v:Vulnerability {id: 'cve-2026-9921'})<-[:AFFECTED_BY]-(s:Service)<-[:OWNS]-(t:Team)\nRETURN s.name, t.name, t.lead, t.onCall;`;
+        blastEl.innerHTML = `&bull; payment-service (Direct host &bull; CVSS 9.8)<br>&bull; order-service (Upstream caller)`;
+        memoryEl.textContent = `Company Brain: Alert routed to Marcus Vance (Security Lead) and Elena Rostova (Payments Lead).`;
+        mcpEl.innerHTML = `Tool: <code>shed_load_traffic(service='payment-service')</code> &bull; Status: Executed`;
+      } else if (target === 'redis-cache') {
+        cypherEl.textContent = `MATCH (c:Cache {id: 'redis-cache'})<-[:CACHES_IN]-(s:Service)\nRETURN s.id, s.tier;`;
+        blastEl.innerHTML = `&bull; auth-service (1 hop &bull; Tier-0)<br>&bull; user-db (Connection pool risk)`;
+        memoryEl.textContent = `Recalled Runbook #RB-REDIS-DRAIN: "Enable temporary in-memory JWT validation fallback."`;
+        mcpEl.innerHTML = `Tool: <code>bypass_cache_to_db(service='auth-service')</code> &bull; Status: Executed`;
+      }
+    }
+  </script>
+</body>
+</html>
